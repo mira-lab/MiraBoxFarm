@@ -2,7 +2,7 @@ pragma solidity ^0.4.11;
 
 contract MiraFactory{
     function askOpen(bytes32 _documentid) returns (bool){}
-    function createSmartOpener(bytes32 _name, bytes32 _documentid, address creator){}
+    function createSmartOpener(bytes32 name, bytes32 documentid, address creator) returns (address){}
 }
 contract PinSecretStorePermissions {
     address private _masterAdmin;
@@ -25,7 +25,8 @@ contract PinSecretStorePermissions {
         _masterAdmin = msg.sender;
         miraFactory = MiraFactory(factory);
     }
-    function setMiraBoxFactory(address factory_address){
+    function setMiraBoxFactory(address factory_address) public{
+        require(_masterAdmin == msg.sender);
         miraFactory = MiraFactory(factory_address);
     }
 
@@ -103,10 +104,10 @@ contract PinSecretStorePermissions {
     }
 
 
-    function addKey(bytes32 document, address user, bytes32 pin, bytes32 template_name) public returns (bool) {
+    function addKey(bytes32 document, address user, bytes32 pin, bytes32 templateName) public returns (address) {
         for (uint i = 0; i < keysCount; i++) {
             if (secretStoreKeys[i].documentId == document) {
-                return false;
+                return address(0);
             }
         }
         secretStoreKeys[keysCount] = SecretStoreKey({
@@ -116,9 +117,9 @@ contract PinSecretStorePermissions {
             allowChangeOwner: false,
             opened: false
         });
-        miraFactory.createSmartOpener(template_name, document, msg.sender);
         keysCount = keysCount + 1;
-        return true;
+        address miraboxHandler =  miraFactory.createSmartOpener(templateName, document, msg.sender);
+        return miraboxHandler;
     }
 
 

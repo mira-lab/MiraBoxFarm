@@ -5,27 +5,27 @@ import 'browser/DateTime.sol';
 contract SimpleTime{
     uint public timeToOpen;
     address public owner;
-    bool canOpen = false;
+    DateTime private datetimeInstance;
     modifier onlyOwner{
         require(msg.sender == owner);
         _;
     }
     function SimpleTime(address creator) public{
         owner = creator;
+        address datetimeAddress = new DateTime();
+        datetimeInstance = DateTime(datetimeAddress);
     }
-    function askOpen() view public returns (bool){
-        if(timeToOpen >= now){
-            canOpen = true;
+    function askOpen() public view returns (bool){
+        if(now >= timeToOpen && timeToOpen != 0){
+            return true;
         }
-        return canOpen;
+        return false;
     }
     function askNow() view public returns(uint){
         return now;
     }
     function setSettings(uint16 year, uint8 month, uint8 day, uint8 hour, uint8 minute, uint8 second) public onlyOwner{
-        address datetime_address = new DateTime();
-        DateTime datetime_instance = DateTime(datetime_address);
-        timeToOpen = datetime_instance.toTimestamp(year, month, day, hour, minute, second);
+        timeToOpen = datetimeInstance.toTimestamp(year, month, day, hour, minute, second);
     }
     function getSettings() view public returns(uint){
         return timeToOpen;
