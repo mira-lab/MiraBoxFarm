@@ -18,9 +18,10 @@ contract MiraFactory{
     mapping(bytes32 => address) public templates;
     mapping(bytes32 => address) public miraboxes;
     string public templatesList;
+    bool private firstTemplate = true;
     function MiraFactory() public{
         owner = msg.sender;
-        templatesList = '{"templates": {}}';
+        templatesList = '{"templates": []}';
     }
     function bytes32ToString(bytes32 x) internal constant returns (string) {
         bytes memory bytesString = new bytes(32);
@@ -66,16 +67,19 @@ contract MiraFactory{
         string memory name = bytes32ToString(template.getName());
         string memory version = bytes32ToString(template.getVersion());
         string memory author =  bytes32ToString(template.getAuthor());
-        var newContent = '"'.toSlice().concat(name.toSlice());
-        newContent = newContent.toSlice().concat('": {"name": "'.toSlice());
-        newContent = newContent.toSlice().concat(name.toSlice());
+        if(firstTemplate){
+            var newContent = '{"name": "'.toSlice().concat(name.toSlice());
+            firstTemplate = false;
+        }else{
+            newContent = ', {"name": "'.toSlice().concat(name.toSlice());
+        }
         newContent = newContent.toSlice().concat('","version": "'.toSlice());
         newContent = newContent.toSlice().concat(version.toSlice());
         newContent = newContent.toSlice().concat('","author": "'.toSlice());
         newContent = newContent.toSlice().concat(author.toSlice());
-        newContent = newContent.toSlice().concat('"},}}'.toSlice());
+        newContent = newContent.toSlice().concat('"}]}'.toSlice());
         var prevContent = templatesList.toSlice();
-        prevContent.until("}}".toSlice());
+        prevContent.until("]}".toSlice());
         templatesList =  prevContent.concat(newContent.toSlice());
     }
     function getTemplatesList() public view returns(string){
