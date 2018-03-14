@@ -50,6 +50,15 @@
 Задать настройки контракта (только для создателя мирабокса)
 ##### function getSettings() view public returns(uint){}
 Получить настройки контракта
+## Установка
+1) Задеплоить контракт MiraFactory
+2) Задеплоить PinSecretStorePermissions, передав адрес MiraFactory в конструктор
+3) Вызвать функцию setACL(address) в MiraFactory с адресом PinSecretStorePermissions
+4) Задеплоить билдер шаблона, передать в функцию addTemplate в MiraFactory
+
+Если нужно сменить фабрику, то вызвать setMiraBoxFactory(address) в PinSecretStorePermissions с новым адресом фабрики. Добавить шаблоны в новую фабрику, если нужно.
+
+Если нужно сменить PinSecretStorePermissions, то вызвать setACL(address) в MiraFactory  с новым адресом контракта.
 ## Как добавить новые шаблоны?
 1) Нужно создать контракт шаблона и контракт билдера этого шаблона.
 
