@@ -20,6 +20,8 @@
 - function getName() public pure returns (bytes32){}
 - function getVersion() public pure returns (bytes32){}
 - function getAuthor() public pure returns (bytes32){}
+- function getAbi() public pure returns (string){}
+- function getDescription() public pure returns (string){}
 
 Для шаблона:
 
@@ -77,6 +79,10 @@
 Возвращает версию шаблона
 ##### function getAuthor() public pure returns (bytes32){}
 Возвращает автора шаблона
+##### function getAbi() public pure returns (string){}
+Возвращает Abi контракта шаблона (не билдера, а шаблона!)
+##### function getDescription() public pure returns (string){}
+Возвращает описание шаблона
 ## SimpleTime (SimpleTime.sol)
 Шаблоны описывают логику - можно ли открыть мирабокс и условия его открытия.
 ##### function askOpen() public view returns (bool){}
