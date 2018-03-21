@@ -150,7 +150,7 @@ contract PinSecretStorePermissions {
 
     function checkPermissions(bytes32 document, address user) public constant returns (bool) {
         for (uint i = 0; i < keysCount; i++) {
-            if ((secretStoreKeys[i].documentId == document) && (secretStoreKeys[i].keyOwner == user)) {
+            if ((secretStoreKeys[i].documentId == document) && (secretStoreKeys[i].keyOwner == user) && (miraFactory.askOpen(document))) {
                 return true;
             }
         }

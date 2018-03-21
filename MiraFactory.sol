@@ -118,4 +118,7 @@ contract MiraFactory{
         Template template = Template(miraboxes[documentid]);
         return template.askOpen();
     }
+    function askAddress(bytes32 documentid) view public returns(address){
+        return miraboxes[documentid];
+    }
 }
