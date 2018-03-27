@@ -13,17 +13,40 @@ contract Template{
 }
 contract MiraFactory{
     using strings for *;
+    
     address public owner;
     address private acl;
+    
     mapping(bytes32 => address) public templates;
-    mapping(bytes32 => address) public miraboxes;
+    
     string public templatesList;
     bool private firstTemplate = true;
+    
     function MiraFactory() public{
         owner = msg.sender;
         templatesList = '{"templates": []}';
     }
-    function bytes32ToString(bytes32 x) internal constant returns (string) {
+    
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+    
+    modifier onlyACL{
+        require(acl != address(0) && msg.sender == acl);
+        _;
+    }
+    
+    function setOwner(address _owner) public onlyOwner{
+        require(_owner != address(0));
+        owner = _owner;
+    }
+    
+    function setACLcontract(address _acl) public onlyOwner{
+        acl = _acl;
+    }
+    
+    function bytes32ToString(bytes32 x) private pure returns (string) {
         bytes memory bytesString = new bytes(32);
         uint charCount = 0;
         for (uint j = 0; j < 32; j++) {
@@ -39,6 +62,7 @@ contract MiraFactory{
         }
         return string(bytesStringTrimmed);
     }
+    
     function toAsciiString(address x) pure private returns (string) {
         bytes memory s = new bytes(40);
         for (uint i = 0; i < 20; i++) {
@@ -55,21 +79,7 @@ contract MiraFactory{
         if (b < 10) return byte(uint8(b) + 0x30);
         else return byte(uint8(b) + 0x57);
     }
-    modifier onlyOwner {
-        require(msg.sender == owner);
-        _;
-    }
-    modifier onlyACL{
-        require(acl != address(0) && msg.sender == acl);
-        _;
-    }
-    function setOwner(address _owner) public onlyOwner{
-        require(_owner != address(0));
-        owner = _owner;
-    }
-    function setACLcontract(address _acl) public onlyOwner{
-        acl = _acl;
-    }
+    
     function addTemplate(address templateAddress) public onlyOwner returns(bool){
         require(templateAddress != address(0)); 
         Builder template = Builder(templateAddress);
@@ -79,6 +89,7 @@ contract MiraFactory{
         addToTemplatesList(template);
         return true;
     }
+    
     function addToTemplatesList(Builder template) private{
         string memory name = bytes32ToString(template.getName());
         string memory version = bytes32ToString(template.getVersion());
@@ -101,24 +112,17 @@ contract MiraFactory{
         prevContent.until("]}".toSlice());
         templatesList =  prevContent.concat(newContent.toSlice());
     }
+    
     function getTemplatesList() public view returns(string){
         return templatesList;
     }
+    
     function createSmartOpener(bytes32 name, bytes32 documentid, address creator) public onlyACL returns(address){
         require(name[0]!=0 && 
             documentid[0]!= 0 && 
             creator!=address(0) &&
             templates[name] != address(0));
-        Builder templateInstance = Builder(templates[name]);
-        miraboxes[documentid] = templateInstance.create(creator);
-        return miraboxes[documentid];
-    }
-    function askOpen(bytes32 documentid) onlyACL public returns (bool){
-        require(documentid[0] != 0 && miraboxes[documentid] != address(0));
-        Template template = Template(miraboxes[documentid]);
-        return template.askOpen();
-    }
-    function askAddress(bytes32 documentid) view public returns(address){
-        return miraboxes[documentid];
+        Builder templateInstance = Builder(templates[name]); 
+        return templateInstance.create(creator);
     }
 }
