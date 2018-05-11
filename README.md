@@ -1,14 +1,12 @@
 # MiraBoxFarm
 Создание шаблонов контрактов, управляющих состоянием MiraBox.
+
 ## Установка
-1) Задеплоить контракт MiraFactory
-2) Задеплоить PinSecretStorePermissions, передав адрес MiraFactory в конструктор
-3) Вызвать функцию setACL(address) в MiraFactory с адресом PinSecretStorePermissions
-4) Задеплоить билдер шаблона, передать в функцию addTemplate в MiraFactory
+1) Задеплоить контракты MiraFactory, PinSecretStorePermissions, MiraboxesStorage.
+2) Вызвать функции setACL(address), setMiraBoxFactory, setMiraboxesStorage, связав все 3 контракта друг с другом.
+3) Задеплоить билдер шаблона, передать в функцию addTemplate в MiraFactory.
 
-Если нужно сменить фабрику, то вызвать setMiraBoxFactory(address) в PinSecretStorePermissions с новым адресом фабрики. Добавить шаблоны в новую фабрику, если нужно.
 
-Если нужно сменить PinSecretStorePermissions, то вызвать setACL(address) в MiraFactory  с новым адресом контракта.
 ## Как добавить новые шаблоны?
 1) Нужно создать контракт шаблона и контракт билдера этого шаблона.
 
@@ -34,18 +32,13 @@
 
 *Для того, чтобы посмотреть список всех контрактов в JSON виде, нужно вызвать функцию getTemplatesList или получить публичную переменную templatesList.*
 
-Название билдера и шаблона может быть любым, но примем называть их:
-- SimpleTime - емкое описание функций шаблона;
-- Builder* - Builder + название шаблона (либо полное, либо аббревиатура).
 ## MiraFactory (MiraFactory.sol)
-В MiraFactory сохраняются шаблоны контрактов (адреса билдеров шаблона), соответствия мирабокса и смарт-контракта.
+В MiraFactory сохраняются адреса билдеров смарт-контрактов (шаблонов).
+
 ##### mapping(bytes32 => address) public templates;
 - bytes32 - название шаблона.
 - address - адрес контракта, который создает новый экземпляр класса по шаблону и возвращает его адрес.
 
-##### mapping(bytes32 => address) public miraboxes;
-- bytes32 - documentId
-- address - смарт-контракт, который управляет условием открытия мирабокса
 ##### templatesList
 Строка в формате json, в которой хранятся название, версия, автор шаблона.
 
@@ -55,19 +48,24 @@
 #####  function setACLcontract(address _acl) public onlyOwner{}
 Задает PinSecretStorePermissions контракт
 ##### function addTemplate(address templateAddress) public onlyOwner returns(bool){}
-- address templateAddress - адрес уже задеплоенного билдера контрактов по шаблону
-
-Если шаблон еще не зарегистрирован, то добавляет его в таблицу, в строку templatesList.
+Функция добавляет билдер шаблона в MiraFactory - все данные получает от его функций getName(), getVersion() и т.п. Нужно передать только адрес билдера. Также добавляет шаблон в json строку templatesList. Вызвать эту функции может только владелец смарт-контракта.
 
 ##### function createSmartOpener(bytes32 name, bytes32 documentid, address creator) public onlyACL returns(address){}
-- bytes32 name - Название желаемого шаблона
-- bytes32 documentid - documentId
-- address creator - кто послал запрос на создание мирабокса
-
-Обращается к билдеру выбранного шаблона, создает новый смарт-контракт, записывает в miraboxes.
-*Можно вызвать только из контракта PinSecretStorePermissions
-#####  function askOpen(bytes32 documentid) onlyACL public returns (bool){}
-Спрашивает у контракта, обслуживающего мирабокс, можно ли его открыть.
+Можно вызвать только из PinSecretStorePermissions. Обращается к билдеру, создает новый контракт и возвращает
+## MiraboxesStorage (MiraboxesStorage.sol)
+Место для хранения соответствия мирабокса к смаркт-контракту
+##### function getMiraboxContract(bytes32 document) public view returns(address){}
+Получает смарт-контракт, который управляет данным мирабоксом
+##### function setMiraboxContract(bytes32 document, address contractAddress) public{}
+Задает смарт-контракт, который будет управлять состоянием мирабокса
+## PinSecretStorePermissions (permission-test-struct.sol)
+Смаркт-контракт, к которому обращается secret-store, связывает storage, factory, смаркт-контракт, который управляет мирабоксом.
+##### function checkPermissions(bytes32 document) public view returns (bool) {}
+Функция, к которой обращается secret-store
+##### function askOpen(bytes32 documentid) public view returns (bool){}
+Спрашивает у смарт-контракта, который управляет мирабоксом, можно ли его открыть
+##### function addKey(bytes32 document, bytes32 templateName) public returns (bool) {}
+Обращается к MiraFactory к функции createSmartOpener, которая создает смарт-контракт по имени шаблона и возвращает его адрес. Обращается к MiraboxeStorage, который записывает соответсвие созданного контракта к мирабоксу.
 ## *Для примера взят шаблон, который позволяет открыть MiraBox только после определенной даты/определенного времени*
 ## BuilderST (BuilderST.sol)
 Билдеры создают новые экземпляры контрактов по шаблону.
