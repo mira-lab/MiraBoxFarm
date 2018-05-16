@@ -23,7 +23,7 @@ contract MiraboxesStorage{
         require(newOwner != address(0));
         owner = newOwner;
     }
-    function setMiraboxContract(bytes32 document, address contractAddress) onlyACL public{
+    function setMiraboxContract(bytes32 document, address contractAddress) public{
         require(contractAddress != address(0) && document[0] != 0 && miraboxes[document] == address(0));
         miraboxes[document] = contractAddress;
     }
