@@ -1,7 +1,5 @@
 var MiraFactory = artifacts.require("./MiraFactory.sol");
-var PinSecretStorePermissions = artifacts.require("./PinSecretStorePermissions.sol");
 var BuilderOnrequest = artifacts.require("./BuilderOnrequest.sol");
-var BuilderST = artifacts.require("./BuilderST.sol");
 var License = artifacts.require('./License.sol');
 var Buffer = artifacts.require('./Buffer.sol');
 

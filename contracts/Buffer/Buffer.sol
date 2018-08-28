@@ -5,8 +5,8 @@ contract Buffer{
     
     address private owner;
     address private miraFactory;
-    uint private keysCount = 0;
-    uint private constant MAXKEYS = 3000000;
+    uint public keysCount = 0;
+    uint private constant MAXKEYS = 100;
     
     mapping (uint => string) keysNumerator;
     mapping (address => bool) masterNodes;
@@ -41,17 +41,6 @@ contract Buffer{
 
     function isMasterNode(address _address) public view returns (bool){
         return(masterNodes[_address]);
-    }
-
-    function stringToBytes32(string memory source) returns (bytes32 result) {
-        bytes memory tempEmptyStringTest = bytes(source);
-        if (tempEmptyStringTest.length == 0) {
-            return 0x0;
-        }
-
-        assembly {
-            result := mload(add(source, 32))
-        }
     }
     
     function giveKey() public returns(string){
