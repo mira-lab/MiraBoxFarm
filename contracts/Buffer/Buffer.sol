@@ -1,16 +1,17 @@
 pragma solidity ^0.4.23;
 
+
 contract Buffer{
     
     address private owner;
-    address private smartFactory;
+    address private miraFactory;
     uint private keysCount = 0;
     uint private constant MAXKEYS = 3000000;
     
-    mapping (uint => bytes32) keysNumerator;
+    mapping (uint => string) keysNumerator;
     mapping (address => bool) masterNodes;
     
-    event PublicKeyControlChange(bytes32 publicKey);
+    event PublicKeyControlChange(string publicKey);
     constructor() public{
         owner = msg.sender;
     }
@@ -20,15 +21,15 @@ contract Buffer{
         _;
     }
     
-    function setFactory(address factoryAddress) onlyOwner public{
-        smartFactory = factoryAddress;
+    function setMiraFactory(address factoryAddress) onlyOwner public{
+        miraFactory = factoryAddress;
     }
     
     function addMasterNode(address masterNode) onlyOwner public{
         masterNodes[masterNode] = true;
     }
     
-    function addKey(bytes32 key) public returns (bool){
+    function addKey(string key) public returns (bool){
         if(((msg.sender == owner) || (masterNodes[msg.sender] == true)) && (keysCount <= MAXKEYS)){
             keysNumerator[keysCount] = key;
             keysCount++;
@@ -37,11 +38,26 @@ contract Buffer{
             return false;
         }
     }
+
+    function isMasterNode(address _address) public view returns (bool){
+        return(masterNodes[_address]);
+    }
+
+    function stringToBytes32(string memory source) returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        assembly {
+            result := mload(add(source, 32))
+        }
+    }
     
-    function giveKey() public returns(bytes32){
-        require(keysCount >= 1 && msg.sender == smartFactory);
+    function giveKey() public returns(string){
+        require(keysCount >= 1 && msg.sender == miraFactory);
         keysCount -= 1;
-        bytes32 keyToGive = keysNumerator[keysCount];
+        string memory keyToGive = keysNumerator[keysCount];
         delete keysNumerator[keysCount];
         emit PublicKeyControlChange(keyToGive);
         return keyToGive;

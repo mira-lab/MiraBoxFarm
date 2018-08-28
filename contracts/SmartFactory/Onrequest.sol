@@ -1,16 +1,25 @@
 pragma solidity ^0.4.18;
 
+import '../Buffer/Buffer.sol';
 
 contract Onrequest{
     
     bool private isOpen = false;
-    address private openAddress;
+    address private receiverAddress;
     address private owner;
-    bytes32 public publicKey;
-    bytes32 private privateKey;
-    constructor (address creator, bytes32 _publicKey) public{
+    string public publicKey;
+    Buffer buffer;
+
+    event PrivateKey(string _value);
+    event Open();
+    event UpdateReciver(string _reciver);
+    event ContractCreated(address contractAddress, string _publicKey);
+
+    constructor (address creator, string _publicKey, address bufferAddress) public{
         owner = creator;
         publicKey = _publicKey;
+        buffer = Buffer(bufferAddress);
+        emit ContractCreated(address(this), _publicKey);
     }
     
     modifier onlyOwner{
@@ -25,21 +34,29 @@ contract Onrequest{
     function askOpen() public view returns (bool){
         return isOpen;
     }
-    function setSettings(address newOpenAddress) public onlyOwner{
-        require(newOpenAddress != address(0));
-        openAddress = newOpenAddress;
+
+    function setSettings(address newReceiverAddress) public onlyOwner{
+        require(newReceiverAddress != address(0));
+        receiverAddress = newReceiverAddress;
     }
+
     function open() public returns(bool){
-        if(msg.sender == openAddress || msg.sender == owner){
+        if(msg.sender == receiverAddress || msg.sender == owner){
             isOpen = true;
+            emit Open();
             return true;
         }
         return false;
     }
-    function getPublicKey() public returns (bytes32){
+
+    function getPublicKey() public returns (string){
         return publicKey;
     }
-    function setPrivateKey(bytes32 _privateKey) public{
-        privateKey = _privateKey;
+
+    function publishPrivateKey(string _value) returns (string)
+    {
+        require(buffer.isMasterNode(msg.sender));
+        emit PrivateKey(_value);
+        return _value;
     }
 }

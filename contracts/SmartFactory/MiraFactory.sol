@@ -1,22 +1,29 @@
 pragma solidity ^0.4.18;
+
 import "./strings.sol";
+import '../Buffer/Buffer.sol';
+
 contract Builder{
-    function create(address, bytes32) public returns (address) {}
+    function create(address, string, address) public returns (address) {}
     function getName() public pure returns (bytes32){}
     function getVersion() public pure returns (bytes32){}
     function getAuthor() public pure returns (bytes32){}
 }
+
 contract MiraFactory{
     using strings for *;
     
     address public owner;
-    address private acl;
-    
+    address public licenseAddress;
+    address public bufferAddress;
     mapping(bytes32 => address) public templates;
     
     string public templatesList;
     bool private firstTemplate = true;
-    
+
+    Buffer private buffer;
+
+
     function MiraFactory() public{
         owner = msg.sender;
         templatesList = '{"templates": []}';
@@ -26,21 +33,26 @@ contract MiraFactory{
         require(msg.sender == owner);
         _;
     }
-    
-    modifier onlyACL{
-        require(acl != address(0) && msg.sender == acl);
+
+    modifier onlyLicense {
+        require(msg.sender == licenseAddress);
         _;
+    }
+
+    function setLicenseContract(address _licenseAddress) public onlyOwner {
+        licenseAddress = _licenseAddress;
+    }
+
+    function setBuffer(address _bufferAddress) onlyOwner public{
+        bufferAddress = _bufferAddress;
+        buffer = Buffer(_bufferAddress);
     }
     
     function setOwner(address _owner) public onlyOwner{
         require(_owner != address(0));
         owner = _owner;
     }
-    
-    function setACLcontract(address _acl) public onlyOwner{
-        acl = _acl;
-    }
-    
+
     function bytes32ToString(bytes32 x) private pure returns (string) {
         bytes memory bytesString = new bytes(32);
         uint charCount = 0;
@@ -111,14 +123,13 @@ contract MiraFactory{
     function getTemplatesList() public view returns(string){
         return templatesList;
     }
+
     
-    function createSmartOpener(bytes32 name, bytes32 documentid, address creator, bytes32 publicKey) public onlyACL returns(address){
-        require(name[0]!=0 && 
-            documentid[0]!= 0 && 
-            creator!=address(0) &&
-            templates[name] != address(0) &&
-            publicKey[0] != 0);
-        Builder templateInstance = Builder(templates[name]); 
-        return templateInstance.create(creator, publicKey);
+    function createMiraboxContract(bytes32 templateName, address creator) public onlyLicense returns(address){
+        require(templateName[0] != 0 &&
+                templates[templateName] != address(0));
+        string memory publicKey = buffer.giveKey();
+        Builder templateInstance = Builder(templates[templateName]);
+        return templateInstance.create(creator, publicKey, bufferAddress);
     }
 }
