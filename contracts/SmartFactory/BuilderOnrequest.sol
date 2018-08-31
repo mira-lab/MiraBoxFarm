@@ -2,9 +2,9 @@ pragma solidity ^0.4.18;
 
 import './Onrequest.sol';
 contract BuilderOnrequest{
-    function create(address creator, string publicKey, address bufferAddress) public returns (address) {
+    function create(address creator, address bufferAddress) public returns (address) {
         require(creator != address(0));
-        address templateInstance =  new Onrequest(creator, publicKey, bufferAddress);
+        address templateInstance =  new Onrequest(creator, bufferAddress);
         return templateInstance;
     }
     function getName() public pure returns (bytes32){

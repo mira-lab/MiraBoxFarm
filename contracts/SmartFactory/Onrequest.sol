@@ -2,24 +2,22 @@ pragma solidity ^0.4.18;
 
 import '../Buffer/Buffer.sol';
 
-contract Onrequest{
+contract Onrequest is MiraboxContract{
     
     bool private isOpen = false;
     address private receiverAddress;
     address private owner;
-    string public publicKey;
+    string public publicKey = '';
     Buffer buffer;
+    address bufferAddress;
 
-    event PrivateKey(string _value);
-    event Open();
-    event UpdateReciver(string _reciver);
-    event ContractCreated(address contractAddress, string _publicKey);
 
-    constructor (address creator, string _publicKey, address bufferAddress) public{
+
+    constructor (address creator, address _bufferAddress) public{
         owner = creator;
-        publicKey = _publicKey;
+        bufferAddress = _bufferAddress;
         buffer = Buffer(bufferAddress);
-        emit ContractCreated(address(this), _publicKey);
+        emit ContractCreated(address(this));
     }
     
     modifier onlyOwner{
@@ -35,9 +33,11 @@ contract Onrequest{
         return isOpen;
     }
 
-    function setSettings(address newReceiverAddress) public onlyOwner{
+    function changeReceiver(address newReceiverAddress) public onlyOwner returns(bool){
         require(newReceiverAddress != address(0));
         receiverAddress = newReceiverAddress;
+        emit UpdateReceiver(newReceiverAddress);
+        return true;
     }
 
     function open() public returns(bool){
@@ -53,10 +53,16 @@ contract Onrequest{
         return publicKey;
     }
 
-    function publishPrivateKey(string _value) returns (string)
+    function publishPrivateKey(string _value) public returns (string)
     {
         require(buffer.isMasterNode(msg.sender));
         emit PrivateKey(_value);
         return _value;
+    }
+
+    function setPublicKey(string _publicKey) public returns (bool){
+        require(msg.sender == bufferAddress);
+        publicKey = _publicKey;
+        return true;
     }
 }

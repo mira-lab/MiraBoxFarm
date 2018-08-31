@@ -1,17 +1,18 @@
 pragma solidity ^0.4.23;
 
+import './BufferInterface.sol';
+import '../SmartFactory/MiraboxContract.sol';
 
-contract Buffer{
+contract Buffer is BufferInterface{
     
     address private owner;
     address private miraFactory;
     uint public keysCount = 0;
-    uint private constant MAXKEYS = 100;
+    uint public constant MAXKEYS = 100;
     
     mapping (uint => string) keysNumerator;
     mapping (address => bool) masterNodes;
-    
-    event PublicKeyControlChange(string publicKey);
+
     constructor() public{
         owner = msg.sender;
     }
@@ -43,12 +44,13 @@ contract Buffer{
         return(masterNodes[_address]);
     }
     
-    function giveKey() public returns(string){
+    function giveKey(address contractAddress) public returns(string){
         require(keysCount >= 1 && msg.sender == miraFactory);
         keysCount -= 1;
         string memory keyToGive = keysNumerator[keysCount];
         delete keysNumerator[keysCount];
-        emit PublicKeyControlChange(keyToGive);
+        emit PublicKeyControlChange(keyToGive, contractAddress);
+        MiraboxContract(contractAddress).setPublicKey(keyToGive);
         return keyToGive;
     }
     

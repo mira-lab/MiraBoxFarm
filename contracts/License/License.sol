@@ -26,7 +26,7 @@ contract License is MintableToken, BurnableToken {
       address contractAddress = miraFactory.createMiraboxContract(templateName, msg.sender);
       if(contractAddress != address(0)){
         _burn(msg.sender, miraboxPrice);
-	PurchasedContract(contractAddress, msg.sender);
+	    emit PurchasedContract(contractAddress, msg.sender);
         return contractAddress;
       }else{
         revert('Error while creating mirabox!');

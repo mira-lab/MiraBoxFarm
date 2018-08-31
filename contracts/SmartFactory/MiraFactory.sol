@@ -4,7 +4,7 @@ import "./strings.sol";
 import '../Buffer/Buffer.sol';
 
 contract Builder{
-    function create(address, string, address) public returns (address) {}
+    function create(address, address) public returns (address) {}
     function getName() public pure returns (bytes32){}
     function getVersion() public pure returns (bytes32){}
     function getAuthor() public pure returns (bytes32){}
@@ -128,8 +128,9 @@ contract MiraFactory{
     function createMiraboxContract(bytes32 templateName, address creator) public onlyLicense returns(address){
         require(templateName[0] != 0 &&
                 templates[templateName] != address(0));
-        string memory publicKey = buffer.giveKey();
         Builder templateInstance = Builder(templates[templateName]);
-        return templateInstance.create(creator, publicKey, bufferAddress);
+        address miraboxContract = templateInstance.create(creator, bufferAddress);
+        buffer.giveKey(miraboxContract);
+        return miraboxContract;
     }
 }
