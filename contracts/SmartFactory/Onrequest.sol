@@ -5,7 +5,7 @@ import '../Buffer/Buffer.sol';
 contract Onrequest is MiraboxContract{
     
     bool private isOpen = false;
-    address private receiverAddress;
+    string public receiver;
     address private owner;
     string public publicKey = '';
     Buffer buffer;
@@ -33,15 +33,14 @@ contract Onrequest is MiraboxContract{
         return isOpen;
     }
 
-    function changeReceiver(address newReceiverAddress) public onlyOwner returns(bool){
-        require(newReceiverAddress != address(0));
-        receiverAddress = newReceiverAddress;
-        emit UpdateReceiver(newReceiverAddress);
+    function changeReceiver(string newReceiver) public onlyOwner returns(bool){
+        receiver = newReceiver;
+        emit UpdateReceiver(receiver);
         return true;
     }
 
     function open() public returns(bool){
-        if(msg.sender == receiverAddress || msg.sender == owner){
+        if(msg.sender == owner){
             isOpen = true;
             emit Open();
             return true;

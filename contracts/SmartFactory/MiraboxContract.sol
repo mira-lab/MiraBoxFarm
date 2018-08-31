@@ -4,14 +4,14 @@ contract MiraboxContract{
 
     event PrivateKey(string _value);
     event Open();
-    event UpdateReceiver(address _receiver);
+    event UpdateReceiver(string receiver);
     event ContractCreated(address contractAddress);
 
     function changeOwner(address newOwner);
 
     function askOpen() public view returns (bool);
 
-    function changeReceiver(address newReceiverAddress) public returns (bool);
+    function changeReceiver(string newReceiver) public returns(bool);
 
     function open() public returns(bool);
 
