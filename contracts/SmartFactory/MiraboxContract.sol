@@ -4,7 +4,7 @@ contract MiraboxContract{
 
     event PrivateKey(string _value);
     event Open();
-    event UpdateReceiver(string indexed receiver);
+    event UpdateReceiver(string receiver);
     event ContractCreated(address indexed contractAddress);
 
     function changeOwner(address newOwner);
