@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 contract BufferInterface{
 
-     event PublicKeyControlChange(string publicKey, address contractAddress);
+     event PublicKeyControlChange(string indexed publicKey, address indexed contractAddress);
 
      function setMiraFactory(address factoryAddress);
 

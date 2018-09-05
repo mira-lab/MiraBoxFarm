@@ -5,7 +5,7 @@ import 'openzeppelin-solidity/contracts/token/ERC20/BurnableToken.sol';
 import '../SmartFactory/MiraFactory.sol';
 
 contract License is MintableToken, BurnableToken {
-    event PurchasedContract(address contractAddress, address owner);
+    event PurchasedContract(address indexed contractAddress, address indexed owner);
     string public name = "License";
     string public symbol = "LIC";
     uint8 public decimals = 18;
